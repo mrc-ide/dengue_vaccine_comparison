@@ -10,7 +10,6 @@
 library(tidyverse)
 library(Hmisc)
 library(patchwork)
-library(grid)
 
 # Source functions
 file.sources = paste0("R/", list.files(path = "R/"))
@@ -25,13 +24,14 @@ cols = c("#8EAFBF", "#D55E00","#CC79A7","#6B0040")
 theme_set(
   theme_bw() +
     theme(
-      text            = element_text(size = 10),
-      axis.text       = element_text(size = 10),
-      axis.title      = element_text(size = 10),
-      plot.title      = element_text(size = 10, hjust = 0.5),
-      plot.subtitle   = element_text(size = 10),
-      plot.caption    = element_text(size = 10),
-      legend.text     = element_text(size = 10),
+      text            = element_text(size = 7),
+      axis.text       = element_text(size = 7),
+      axis.title      = element_text(size = 7),
+      plot.title      = element_text(size = 7, hjust = 0.5),
+      plot.subtitle   = element_text(size = 7),
+      plot.caption    = element_text(size = 7),
+      legend.text     = element_text(size = 7),
+      strip.text      = element_text(size = 7),
       legend.spacing.y = unit(1, "pt"),
       legend.spacing.x = unit(1, "cm"),
       legend.margin   = margin(0, 0, 0, 0),
@@ -286,3 +286,8 @@ all_plot =
 
 # Save as RDS to combine with other plots in script 3. 
 saveRDS(all_plot, file = "output/figures/all_attack_rates.rds")
+
+
+# Save source data 
+# source_data =  bind_rows(all_Q, all_D, all_B, .id = "vaccine") 
+# write.csv(source_data, "output/figures/source_data/Figure1a.csv")

@@ -15,26 +15,19 @@ cols = c("#CC79A7", "#D55E00", "#8EAFBF", "#A9D6C6")
 theme_set(
   theme_bw() +
     theme(
-      text = element_text(size = 8),
-      axis.text = element_text(size = 8),
-      axis.title = element_text(size = 8),
-      plot.title = element_text(size = 8, hjust = 0.5),
-      plot.subtitle = element_text(size = 8),
-      plot.caption = element_text(size = 8),
-      legend.text = element_text(size = 6.5),
+      text = element_text(size = 7),
+      axis.text = element_text(size = 7),
+      axis.title = element_text(size = 7),
+      plot.title = element_text(size = 7, hjust = 0.5),
+      plot.subtitle = element_text(size = 7),
+      plot.caption = element_text(size = 7),
+      legend.text = element_text(size = 7),
+      strip.text      = element_text(size = 7),
       legend.title = element_blank(),
-      strip.text.x       = element_text(size = 8, colour = "grey20"),
-      strip.background   = element_rect(fill = "grey93", colour = NA),
       strip.clip         = "off",   # prevents label clipping if strip is narrow
       legend.position    = "top",
       legend.margin      = margin(b = 2),
-      legend.spacing.x   = unit(6, "pt"),
-      strip.text.y.right = element_text(
-        angle  = 0,
-        hjust  = 0,
-        size   = 8,
-        colour = "grey20"
-      )
+      legend.spacing.x   = unit(6, "pt")
     ))
 
 # files 
@@ -186,4 +179,7 @@ ggsave(
   dpi = 300
 )
 
+
+# Save source data 
+# write.csv(comb_VE, "output/figures/source_data/Figure2_3.csv")
 

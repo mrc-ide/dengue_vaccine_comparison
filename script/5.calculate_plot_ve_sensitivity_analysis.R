@@ -50,14 +50,14 @@ mycols = c("#B39EB5", "#B2D3A8", "#89A497", "#AEC6CF", "#B8B8AC", "#FFFFFF")
 my_theme = theme_set(
   theme_bw() +
     theme(
-      text = element_text(size = 8),
-      axis.text = element_text(size = 8),
-      axis.title = element_text(size = 8),
-      plot.subtitle = element_text(size = 8),
-      plot.caption = element_text(size = 8),
-      legend.text = element_text(size = 8),
+      text = element_text(size = 7),
+      axis.text = element_text(size = 7),
+      axis.title = element_text(size = 7),
+      plot.subtitle = element_text(size = 7),
+      plot.caption = element_text(size = 7),
+      legend.text = element_text(size = 7),
       legend.title = element_blank(),
-      strip.text = element_text(size = 8),
+      strip.text = element_text(size = 7),
       legend.spacing.y = unit(0, "pt"),
       legend.margin = margin(0, 0, 0, 0)))
 
@@ -85,7 +85,7 @@ Q_diff = calculate_diff(
   main_model = "M4",
   serostatus_labels = serostatus_labels
 ) 
-
+09
 D_diff = calculate_diff(
   VE_D,
   age_weights = Dage_weights,
@@ -192,35 +192,6 @@ D_plot = plot_heatmap(D_data_plot, scale_limit)
 
 B_plot = plot_heatmap(B_data_plot, scale_limit)
 
-# ── Save individual heatmaps ──────────────────────────────────────────────────
-
-ggsave(
-  filename = "output/figures/Q_plot_heatmap_diff.pdf",
-  plot     = Q_plot,
-  width    = 22,
-  height   = 12,   
-  units    = "cm"
-)
-
-
-
-ggsave(
-  filename = "output/figures/D_plot_heatmap_diff.pdf",
-  plot     = D_plot,
-  width    = 22,
-  height   = 12,   
-  units    = "cm"
-)
-
-
-ggsave(
-  filename = "output/figures/B_plot_heatmap_diff.pdf",
-  plot     = B_plot,
-  width    = 22,
-  height   = 12,   
-  units    = "cm"
-)
-
 
 # ── Assemble and save Fig. 4 ──────────────────────────────────────────────────
 
@@ -237,8 +208,13 @@ all = (Q_plot / D_plot / B_plot) +
 ggsave(
   filename = "output/figures/Fig4.pdf",
   plot     = all,
-  width    = 21,
-  height   = 22,   
+  width    = 18,
+  height   = 20,   
   units    = "cm"
 )
+
+
+# Save source data 
+# source_data = bind_rows(ve_out)
+# write.csv(source_data, "output/figures/source_data/Figure4.csv")
 

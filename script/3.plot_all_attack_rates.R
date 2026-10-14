@@ -13,6 +13,7 @@ library(patchwork)
 library(grid)
 library(cowplot)
 
+
 # Source functions
 file.sources = paste0("R/", list.files(path = "R/"))
 sapply(file.sources, source)
@@ -22,19 +23,20 @@ output = "output/figures"
 
 # Colour palettes
 serotype_fill = c("#148695", "#C51B8A", "#BDCACE", "#016C59", "#111111")
-trial_fill    = c("#6B0040", "#7791D1") 
+trial_fill    = c("#6B0040", "#7791D1", "#D55E00","#CC79A7") 
 
 
 theme_set(
   theme_bw() +
     theme(
-      text            = element_text(size = 10),
-      axis.text       = element_text(size = 10),
-      axis.title      = element_text(size = 10),
-      plot.title      = element_text(size = 10, hjust = 0.5),
-      plot.subtitle   = element_text(size = 10),
-      plot.caption    = element_text(size = 10),
-      legend.text     = element_text(size = 8),
+      text            = element_text(size = 7),
+      axis.text       = element_text(size = 7),
+      axis.title      = element_text(size = 7),
+      plot.title      = element_text(size = 7, hjust = 0.5),
+      plot.subtitle   = element_text(size = 7),
+      plot.caption    = element_text(size = 7),
+      legend.text     = element_text(size = 7),
+      strip.text      = element_text(size = 7),
       legend.spacing.y = unit(1, "pt"),
       legend.spacing.x = unit(1, "cm"),
       legend.margin   = margin(0, 0, 0, 0),
@@ -92,16 +94,19 @@ time_plot_Q = AR_model_Q %>%
     outcome = factor(outcome, labels = c("symptomatic", "hospitalised"))
   ) %>%
   bind_rows(AR_VRD_Q) %>%
-  mutate(month = as.character(month)) %>%
-  filter(outcome != "symptomatic") %>% 
-  ggplot(aes(x = month, y = mean)) +
-  geom_point(aes(color = trial, shape = type),
-             position = position_dodge(width = 0.6), size = 1.5) +
-  geom_errorbar(aes(ymin = lower, ymax = upper, color = trial, linetype = type),
-                position = position_dodge(width = 0.6), width = 0, linewidth = 0.5) +
-  labs(x = "Month", y = "Qdenga hospitalised\nattack rate (%)") +
+  mutate(month = as.character(month)) %>% 
+  mutate(x = paste0(trial, " ", outcome)) %>% 
+  mutate(x = factor(x, levels = c("placebo symptomatic", "vaccine symptomatic",
+                                  "placebo hospitalised", "vaccine hospitalised"),
+                    labels = c("P symp", "V symp", "P hosp", "V hosp"))) %>% 
+  ggplot(aes(x = month, y = mean,  color = x)) +
+  geom_point(aes(shape = type),
+             position = position_dodge(width = 0.4), size = 1.5) +
+  geom_errorbar(aes(ymin = lower, ymax = upper, linetype = type),
+                position = position_dodge(width = 0.4), width = 0, linewidth = 0.5) +
+  labs(x = "Month", y = "Qdenga attack rate (%)") +
   scale_color_manual(values = trial_fill) +
-  theme(legend.position = c(0.81,0.8))
+  theme(legend.position = c(0.81,0.76))
 
 # Serotype plot
 AR_BVKR_Q = data_Q %>%
@@ -131,13 +136,12 @@ serotype_plot_Q = AR_model_Q %>%
   filter(outcome == "symptomatic") %>% 
   ggplot(aes(x = x, y = mean, color = serotype, shape = type, linetype = type,
              group = interaction(type, serotype))) +
-  geom_point(position = position_dodge(width = 0.5), size = 1.5) +
+  geom_point(position = position_dodge(width = 0.8), size = 1.5) +
   geom_errorbar(aes(ymin = lower, ymax = upper),
-                position = position_dodge(width = 0.5), width = 0, linewidth = 0.5) +
-  guides(shape = "none", linetype = "none") +
+                position = position_dodge(width = 0.8), width = 0, linewidth = 0.5) +
   scale_color_manual(values = serotype_fill) +
   ylab("Qdenga symptomatic\nattack rate over 54 months (%)") +
-  theme(legend.position = c(0.87,0.8), axis.title.x = element_blank())
+  theme(legend.position = c(0.85,0.78), axis.title.x = element_blank())
 
 # ── Dengvaxia ──────────────────────────────────────────────────────────────────
 
@@ -200,7 +204,7 @@ time_plot_D = AR_model_D %>%
   geom_errorbar(aes(ymin = lower, ymax = upper, color = arm, linetype = type),
                 position = position_dodge(width = 0.6), width = 0, linewidth = 0.5) +
   labs(x = "Month", y = "Dengvaxia hospitalised\nattack rate (%)") +
-  scale_color_manual(values = trial_fill) +
+  scale_color_manual(values = c( "#D55E00","#CC79A7")) +
   theme(legend.position = "none")
 
 
@@ -209,7 +213,8 @@ time_plot_D = AR_model_D %>%
 cases_B$Sy_VD = cases_B$Sy_BVJ %>%  
   group_by(arm, time) %>%  
   summarise(Y = sum(Y),
-            N = sum(N))
+            N = sum(N)) %>% 
+  mutate(time  = factor(time, labels = c("24", "60")))
 
 cases_B$Sy_BVK = cases_B$Sy_BVKJ %>%  
   group_by(arm, serostatus, serotype) %>%  
@@ -252,7 +257,7 @@ time_plot_B = AR_model_B %>%
   separate(name, into = c("arm", "time")) %>%
   mutate(
     arm        = factor(arm, labels = c("placebo", "vaccine")),
-    time        = factor(time, labels = c("1-24", "25-60")),
+    time        = factor(time, labels = c("24", "60")),
   ) %>%
   bind_rows(AR_data_B$Sy_VD) %>%
   mutate(
@@ -295,3 +300,12 @@ ggsave(
   dpi      = 600
 )
 
+
+# Save source data 
+# source_data = bind_rows(AR_model_Q, AR_model_B, AR_model_D)
+# library(writexl) 
+# write.csv(source_data, "output/figures/source_data/Figure1b_1c_model.csv")
+# write.csv(VCD_Q, "output/figures/source_data/Figure1b_1c_Q_data_vcd.csv")
+# write.csv(hosp_Q, "output/figures/source_data/Figure1b_1c_Q_data_hosp.csv")
+# write_xlsx(VCD_D, "output/figures/source_data/Figure1b_1c_D_data.xlsx")
+# write_xlsx(cases_B, "output/figures/source_data/Figure1b_1c_B_data.xlsx")
