@@ -20,7 +20,7 @@ input  = "output/M4/" # final model
 output = "output/figures"
 
 # Colour palettes
-cols = c("#8EAFBF", "#D55E00","#CC79A7")
+cols = c("#8EAFBF", "#D55E00","#CC79A7","#6B0040")
 
 theme_set(
   theme_bw() +
@@ -116,15 +116,16 @@ all_Q = bind_rows(model_age_Q, model_serotype_age_Q, model_serotype_Q) %>%
   rename(model_lower = lower,
          model_mean = mean,
          model_upper = upper) %>% 
-  left_join(data_ar_Q) 
+  left_join(data_ar_Q) %>% 
+  mutate(x = paste0(trial, " ", serostatus))
 
 # Diagnostic scatter plot: observed vs. model attack rates for Qdenga
 Q_all_plot = all_Q %>%  
-  ggplot(aes(x = mean, y = model_mean)) +
+  ggplot(aes(x = mean, y = model_mean, color = x)) +
   geom_point(alpha = 0.2) +
   geom_errorbar(aes(ymin = model_lower, ymax = model_upper),alpha = 0.2) +
   geom_errorbar(aes(xmin = lower, xmax = upper),alpha = 0.2) +
-  geom_abline(slope = 1, intercept = 0, color = "red", linetype = 2) +
+  geom_abline(slope = 1, intercept = 0, color = "black", linetype = 2) +
   labs(y = "model attack rate (%)", x = "data attack rate (%)")
 
 
@@ -187,17 +188,19 @@ model_De = bind_rows(Sy_AR_VK_De, Sy_AR_BVJ_De, Ho_AR_BVJD_De, Ho_AR_BVKJ_De) %>
 
 # Combine data and model 
 all_D = model_De %>% 
-left_join(AR_data_D) 
+left_join(AR_data_D)  %>% 
+  filter(serostatus != "both") %>% 
+  mutate(x = paste0(arm, " ", serostatus))
 
 
 # Diagnostic scatter plot: observed vs. model attack rates for Dengvaxia
 
 D_all_plot = all_D %>%  
-  ggplot(aes(x = mean, y = model_mean)) +
+  ggplot(aes(x = mean, y = model_mean, color = x)) +
   geom_point(alpha = 0.2) +
   geom_errorbar(aes(ymin = model_lower, ymax = model_upper),alpha = 0.2) +
   geom_errorbar(aes(xmin = lower, xmax = upper),alpha = 0.2) +
-  geom_abline(slope = 1, intercept = 0, color = "red", linetype = 2) +
+  geom_abline(slope = 1, intercept = 0, color = "black", linetype = 2) +
   labs(y = "model attack rate (%)", x = "data attack rate (%)")
 
 
@@ -249,15 +252,16 @@ model_B = bind_rows(serotype_B, age_B, serotype_age_B) %>%
 
 # Combine data and model 
 all_B = model_B %>% 
-  left_join(AR_data_B) 
+  left_join(AR_data_B) %>% 
+  mutate(x = paste0(arm, " ", serostatus))
 
 # Diagnostic scatter plot: observed vs. model attack rates for Butantan-DV
 B_all_plot = all_B %>%  
-  ggplot(aes(x = mean, y = model_mean)) +
+  ggplot(aes(x = mean, y = model_mean, color = x)) +
   geom_point(alpha = 0.2) +
   geom_errorbar(aes(ymin = model_lower, ymax = model_upper),alpha = 0.2) +
   geom_errorbar(aes(xmin = lower, xmax = upper),alpha = 0.2) +
-  geom_abline(slope = 1, intercept = 0, color = "red", linetype = 2) +
+  geom_abline(slope = 1, intercept = 0, color = "black", linetype = 2) +
   labs(y = "model attack rate (%)", x = "data attack rate (%)")
 
 # ── All plots ───────────────────────────────────────────────────────────────
@@ -268,7 +272,9 @@ all_plot =
   bind_rows(all_Q, all_D, all_B, .id = "vaccine") %>% 
   mutate(vaccine = factor(vaccine, labels = c("Qdenga", "Dengvaxia", "Butantan-DV"))) %>% 
   filter(!is.na(mean)) %>%  # remove points with model but not data output
-  ggplot(aes(x = mean, y = model_mean, color = vaccine)) +
+  mutate(x = factor(x, levels = c("placebo seronegative", "placebo seropositive",
+                                  "vaccine seronegative", "vaccine seropositive"))) %>% 
+  ggplot(aes(x = mean, y = model_mean, color = x)) +
   geom_point(alpha = 0.4) +
   geom_errorbar(aes(ymin = model_lower, ymax = model_upper),alpha = 0.4) +
   geom_errorbar(aes(xmin = lower, xmax = upper),alpha = 0.4) +
@@ -276,7 +282,7 @@ all_plot =
   labs(y = "Estimated attack rate (%)", x = "Observed attack rate (%)") +
   scale_color_manual(values =cols) +
   facet_wrap(~vaccine) +
-  theme(legend.position = "none")
+  theme(legend.position = "top")
 
 # Save as RDS to combine with other plots in script 3. 
 saveRDS(all_plot, file = "output/figures/all_attack_rates.rds")
